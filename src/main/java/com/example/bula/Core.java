@@ -6,6 +6,7 @@ import java.util.List;
 
 public class Core {
 
+    public static final int MAX_POS = 30;
     public List<Integer> fp;
 
     public List<Integer> sp;
@@ -66,149 +67,28 @@ public class Core {
         if (die1 != die2) {
             boolean hasValidMove = false;
 
-            for (int i = 0; i < fp.size(); i++) {
-                if (fp.get(i) != 0  && sp.get(i ) < 2 && !spBlockFp.get(i)
-                        && (i + die1 + die2) < fp.size()
-                        && !spBlockFp.get(i + die1)
-                        && (sp.get(i + die1) == 0 || ((sp.get(i + die1) == 1 && !spBlockFp.get(i + die1))))
-                        && (sp.get(i + die1 + die2) == 0 || ((sp.get(i + die1 + die2) == 1 && !spBlockFp.get(i + die1 + die2))))
-                        && (i + die1 + die2) < fp.size()) {
+            hasValidMove = poolMoveDie1AndDie2AfterThat(die1, die2, resList, hasValidMove);
 
-                    hasValidMove = true;
-                    PositionMove positionMove = new PositionMove(i, die1, i + die1, die2,
-                            "i, die1, i + die1, die2{" + i + ", " + die1 + ", " + (i + die1) + ", " + die2 + "}" );
-                    resList.add(positionMove);
+            hasValidMove = poolMoveDie2AndDie1AfterThat(die1, die2, resList, hasValidMove);
 
-                }
-            }
-
-            for (int i = 0; i < fp.size(); i++) {
-                if (fp.get(i) != 0  && sp.get(i ) < 2 && !spBlockFp.get(i)
-                        && (i + die1 + die2) < fp.size()
-                        && !spBlockFp.get(i + die2)
-                        && (sp.get(i + die2) == 0 || ((sp.get(i + die2) == 1 && !spBlockFp.get(i + die2))))
-                        && (sp.get(i + die1 + die2) == 0 || ((sp.get(i + die1 + die2) == 1 && !spBlockFp.get(i + die1 + die2))))
-                        && (i + die1 + die2) < fp.size()) {
-
-                    hasValidMove = true;
-                    PositionMove positionMove = new PositionMove(i, die2, i + die2, die1,
-                            "i, die2, i + die2, die1{" + i + ", " + die1 + ", " + (i + die1) + ", " + die2 + "}");
-                    resList.add(positionMove);
-                }
-            }
-
-            for (int i = 0; i < fp.size(); i++) {
-                for (int y = 0; y < fp.size(); y++) {
-                    if (fp.get(i) != 0 && fp.get(y) != 0
-                            && sp.get(i ) < 2 && !spBlockFp.get(i)
-                            && sp.get(y ) < 2 && !spBlockFp.get(y)
-                            && (i + die1) < fp.size()
-                            && !spBlockFp.get(i + die1)
-                            && (sp.get(i + die1) == 0 || ((sp.get(i + die1) == 1 && !spBlockFp.get(i + die1))))
-                            && (y + die2) < fp.size()
-                            && !spBlockFp.get(y + die2)
-                            && (sp.get(y + die2) == 0 || ((sp.get(y + die2) == 1 && !spBlockFp.get(y + die2))))
-                            //&& !((i == y && fp.get(y) == 1)) // ????
-                            && (i + die1) < fp.size() && (y + die2) < fp.size()) {
-
-                        hasValidMove = true;
-                        PositionMove positionMove = new PositionMove(i, die1, y, die2,
-                                "i, die1, y, die2 {" + i + ", " + die1 + ", " + y + ", " + die2 + "}");
-                        resList.add(positionMove);
-                    }
-                }
-            }
+            hasValidMove = poolMoveDie1AnotherPoleMoveDie2(die1, die2, resList, hasValidMove);
 
             if (!hasValidMove) {
+                poolMoveDie1(die1, resList);
 
-                for (int i = 0; i < fp.size(); i++) {
-                    if (fp.get(i) != 0  && sp.get(i ) < 2 && !spBlockFp.get(i)
-                            && (i + die1) < fp.size()
-                            && !spBlockFp.get(i + die1)
-                            && !spBlockFp.get(i)
-                            && (sp.get(i + die1) == 0 || ((sp.get(i + die1) == 1 && !spBlockFp.get(i + die1))))
-                            && (i + die1) < fp.size()) {
-
-                        PositionMove positionMove = new PositionMove(i, die1, "i, die1 {" + i + ", " + die1 + "}");
-                        resList.add(positionMove);
-                    }
-                }
-
-                for (int i = 0; i < fp.size(); i++) {
-                    if (fp.get(i) != 0  && sp.get(i ) < 2 && !spBlockFp.get(i)
-                            && (i + die2) < fp.size()
-                            && !spBlockFp.get(i + die2)
-                            && !spBlockFp.get(i)
-                            && (sp.get(i + die2) == 0 || ((sp.get(i + die2) == 1 && !spBlockFp.get(i + die2))))
-                            && (i + die2) < fp.size()) {
-
-                        PositionMove positionMove = new PositionMove(i, die2, "i, die2 {" + i + ", " + die2 + "}");
-                        resList.add(positionMove);
-                    }
-                }
-
+                poolMoveDie2(die2, resList);
             }
-
         }
         if (die1 == die2) {
             boolean hasValidMove = false;
 
-            for (int i = 0; i < fp.size(); i++) {
-                if (fp.get(i) != 0
-                        && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
-                        && sp.size() > (i + 2 * die1) && sp.get(i + 2 * die1) < 2 && !spBlockFp.get(i + 2 * die1)
-                        && sp.size() > (i + 3 * die1) && sp.get(i + 3 * die1) < 2 && !spBlockFp.get(i + 3 * die1)
-                        && sp.size() > (i + 4 * die1) && sp.get(i + 4 * die1) < 2 && !spBlockFp.get(i + 4 * die1)
-                        && (i + 4 * die1) < fp.size()) {
-                    hasValidMove = true;
-                    PositionMove positionMove = new PositionMove(i, die1, i + die1, die1, i + 2 * die1, die1, i + 3 * die1, die1,
-                            "1 X 4");
-                    resList.add(positionMove);
-                }
-            }
+            hasValidMove = poolMoveDie1FourTimes(die1, resList, hasValidMove);
 
-            for (int i = 0; i < fp.size(); i++) {
-                if (fp.get(i) > 3
-                        && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
-                        && (i + die1) < fp.size()) {
-                    hasValidMove = true;
-                    PositionMove positionMove = new PositionMove(i, die1, i, die1, i, die1, i, die1, "4 X 1");
-                    resList.add(positionMove);
-                }
-            }
+            hasValidMove = fourPoolsMoveDie1Once(die1, resList, hasValidMove);
 
-            for (int i = 0; i < fp.size(); i++) {
-                for (int y = 0; y < fp.size(); y++) {
-                    if (fp.get(i) >= 1  && sp.get(i ) < 2 && !spBlockFp.get(i)
-                            && fp.get(y) >= 1 && sp.get(y ) < 2 && !spBlockFp.get(y)
-                            && ((i == y && fp.get(i) > 1) || (i != y ))
-                            && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
-                            && sp.size() > (i + 2 * die1) && sp.get(i + 2 * die1) < 2 && !spBlockFp.get(i + 2 * die1)
-                            && sp.size() > (i + 3 * die1) && sp.get(i + 3 * die1) < 2 && !spBlockFp.get(i + 3 * die1)
-                            && sp.size() > (y + die1) && sp.get(y + die1) < 2 && !spBlockFp.get(y + die1)
-                            && (i + 3 * die1) < fp.size() && (y + die1) < fp.size()) {
-                        hasValidMove = true;
-                        PositionMove positionMove = new PositionMove(i, die1, i + die1, die1, i + 2 * die1, die1, y, die1, "1 X 3 & 1 X 1");
-                        resList.add(positionMove);
-                    }
-                }
-            }
+            hasValidMove = onePoolMoveTreeTimesDie1AndAnotherPoolMoveDie1Once(die1, resList, hasValidMove);
 
-            for (int i = 0; i < fp.size(); i++) {
-                for (int y = 0; y < fp.size(); y++) {
-                    if (fp.get(i) >= 1  && sp.get(i ) < 2 && !spBlockFp.get(i)
-                            && fp.get(y) >= 2  && sp.get(y ) < 2 && !spBlockFp.get(y)
-                            && ((i == y && fp.get(i) > 2) || (i != y ))
-                            && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
-                            && sp.size() > (i + 2 * die1) && sp.get(i + 2 * die1) < 2 && !spBlockFp.get(i + 2 * die1)
-                            && sp.size() > (y + die1) && sp.get(y + die1) < 2 && !spBlockFp.get(y + die1)
-                            && (i + 2 * die1) < fp.size() && (y + die1) < fp.size()) {
-                        hasValidMove = true;
-                        PositionMove positionMove = new PositionMove(i, die1, i + die1, die1, y, die1, y, die1, "1 X 2 & 2 X 1");
-                        resList.add(positionMove);
-                    }
-                }
-            }
+            hasValidMove = onePoolMoveTwoTimesDie1AndAnotherTwoPoolsMoveDie1OnceFromTheSamePosition(die1, resList, hasValidMove);
 
 
             for (int i = 0; i < fp.size(); i++) {
@@ -218,7 +98,8 @@ public class Core {
                             && i != y
                             && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
                             && sp.size() > (y + die1) && sp.get(y + die1) < 2 && !spBlockFp.get(y + die1)
-                            && (i + die1) < fp.size() && (y + die1) < fp.size()) {
+                            && (i + die1) < fp.size() && (y + die1) < fp.size()
+                            && i < MAX_POS && y < MAX_POS) {
                         hasValidMove = true;
                         PositionMove positionMove = new PositionMove(i, die1, i , die1, i , die1, y, die1, "3 X 1 & 1 X 1");
                         resList.add(positionMove);
@@ -236,7 +117,8 @@ public class Core {
                             && sp.size() > (i + 2 * die1) && sp.get(i + 2 * die1) < 2 && !spBlockFp.get(i + 2 * die1)
                             && sp.size() > (y + die1) && sp.get(y + die1) < 2 && !spBlockFp.get(y + die1)
                             && sp.size() > (y + 2 * die1) && sp.get(y + 2 * die1) < 2 && !spBlockFp.get(y + 2 * die1)
-                            && (i + 2 * die1) < fp.size() && (y + 2 * die1) < fp.size()) {
+                            && (i + 2 * die1) < fp.size() && (y + 2 * die1) < fp.size()
+                            && i < MAX_POS && y < MAX_POS) {
                         hasValidMove = true;
                         PositionMove positionMove = new PositionMove(i, die1, i + die1, die1, y, die1, y + die1, die1, "2 X 2");
                         resList.add(positionMove);
@@ -251,7 +133,8 @@ public class Core {
                             && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
                             && sp.size() > (i + 2 * die1) && sp.get(i + 2 * die1) < 2 && !spBlockFp.get(i + 2 * die1)
                             && sp.size() > (i + 3 * die1) && sp.get(i + 3 * die1) < 2 && !spBlockFp.get(i + 3 * die1)
-                            && (i + 3 * die1) < fp.size() ) {
+                            && (i + 3 * die1) < fp.size()
+                            && i < MAX_POS) {
                         hasValidMove = true;
                         PositionMove positionMove = new PositionMove(i, die1, i + die1, die1, i + 2 * die1, die1, "1 X 3");
                         resList.add(positionMove);
@@ -261,7 +144,8 @@ public class Core {
                 for (int i = 0; i < fp.size(); i++) {
                     if (fp.get(i) > 2 && sp.get(i ) < 2 && !spBlockFp.get(i)
                             && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
-                            && (i + die1) < fp.size() ) {
+                            && (i + die1) < fp.size()
+                            && i < MAX_POS) {
                         hasValidMove = true;
                         PositionMove positionMove = new PositionMove(i, die1, i, die1, i, die1, "3 X 1");
                         resList.add(positionMove);
@@ -276,7 +160,8 @@ public class Core {
                                 && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
                                 && sp.size() > (i + 2 * die1) && sp.get(i + 2 * die1) < 2 && !spBlockFp.get(i + 2 * die1)
                                 && sp.size() > (y + die1) && sp.get(y + die1) < 2 && !spBlockFp.get(y + die1)
-                                && (i + 2 * die1) < fp.size() && (y + die1) < fp.size() ) {
+                                && (i + 2 * die1) < fp.size() && (y + die1) < fp.size()
+                                && i < MAX_POS && y < MAX_POS) {
                             hasValidMove = true;
                             PositionMove positionMove = new PositionMove(i, die1, i + die1, die1, y, die1, "1 X 2 & 1 X 1");
                             resList.add(positionMove);
@@ -292,7 +177,8 @@ public class Core {
                                 && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
                                 && sp.size() > (i + 2 * die1) && (sp.get(i + 2 * die1) < 2 && !spBlockFp.get(i + 2 * die1))
                                 && sp.size() > (y + die1) && sp.get(y + die1) < 2 && !spBlockFp.get(y + die1)
-                                && (i + 2 * die1) < fp.size() && (y + die1) < fp.size()) {
+                                && (i + 2 * die1) < fp.size() && (y + die1) < fp.size()
+                                && i < MAX_POS && y < MAX_POS) {
                             hasValidMove = true;
                             PositionMove positionMove = new PositionMove(i, die1, i + die1, die1, y, die1, "1 X 1 & 2 X 1");
                             resList.add(positionMove);
@@ -306,7 +192,8 @@ public class Core {
                         if (fp.get(i) >= 1 && sp.get(i ) < 2 && !spBlockFp.get(i)
                                 && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
                                 && sp.size() > (i + 2 * die1) && sp.get(i + 2 * die1) < 2 && !spBlockFp.get(i + 2 * die1)
-                                && (i + 2 * die1) < fp.size() ) {
+                                && (i + 2 * die1) < fp.size()
+                                && i < MAX_POS) {
                             hasValidMove = true;
                             PositionMove positionMove = new PositionMove(i, die1, i + die1, die1, "1 X 2");
                             resList.add(positionMove);
@@ -316,7 +203,8 @@ public class Core {
                     for (int i = 0; i < fp.size(); i++) {
                         if (fp.get(i) > 2
                                 && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
-                                && (i + die1) < fp.size() ) {
+                                && (i + die1) < fp.size()
+                                && i < MAX_POS) {
                             hasValidMove = true;
                             PositionMove positionMove = new PositionMove(i, die1, i, die1, i, die1, "2 X 1");
                             resList.add(positionMove);
@@ -331,7 +219,8 @@ public class Core {
                                     && i != y
                                     && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
                                     && sp.size() > (y + die1) && sp.get(y + die1) < 2 && !spBlockFp.get(y + die1)
-                                    && (i + die1) < fp.size() && (y + die1) < fp.size() ) {
+                                    && (i + die1) < fp.size() && (y + die1) < fp.size()
+                                    && i < MAX_POS && y < MAX_POS) {
                                 hasValidMove = true;
                                 PositionMove positionMove = new PositionMove(i, die1, y, die1, "1 X 1 & 1 X 1");
                                 resList.add(positionMove);
@@ -344,7 +233,8 @@ public class Core {
                         for (int i = 0; i < fp.size(); i++) {
                             if (fp.get(i) != 0 && sp.get(i ) < 2 && !spBlockFp.get(i)
                                     && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
-                                    && (i + die1) < fp.size()) {
+                                    && (i + die1) < fp.size()
+                                    && i < MAX_POS) {
                                 PositionMove positionMove = new PositionMove(i, die1, "1 X 1");
                                 resList.add(positionMove);
                             }
@@ -356,6 +246,180 @@ public class Core {
 
 
         return resList;
+    }
+
+    private boolean onePoolMoveTwoTimesDie1AndAnotherTwoPoolsMoveDie1OnceFromTheSamePosition(int die1, List<PositionMove> resList, boolean hasValidMove) {
+        for (int i = 0; i < fp.size(); i++) {
+            for (int y = 0; y < fp.size(); y++) {
+                if (fp.get(i) >= 1  && sp.get(i ) < 2 && !spBlockFp.get(i)
+                        && fp.get(y) >= 2  && sp.get(y ) < 2 && !spBlockFp.get(y)
+                        && ((i == y && fp.get(i) > 2) || (i != y ))
+                        && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
+                        && sp.size() > (i + 2 * die1) && sp.get(i + 2 * die1) < 2 && !spBlockFp.get(i + 2 * die1)
+                        && sp.size() > (y + die1) && sp.get(y + die1) < 2 && !spBlockFp.get(y + die1)
+                        && (i + 2 * die1) < fp.size() && (y + die1) < fp.size()
+                        && i < MAX_POS && y < MAX_POS) {
+                    hasValidMove = true;
+                    PositionMove positionMove = new PositionMove(
+                            i, die1, i + die1, die1, y, die1, y, die1, "1 X 2 & 2 X 1");
+                    resList.add(positionMove);
+                }
+            }
+        }
+        return hasValidMove;
+    }
+
+    private boolean onePoolMoveTreeTimesDie1AndAnotherPoolMoveDie1Once(int die1, List<PositionMove> resList, boolean hasValidMove) {
+        for (int i = 0; i < fp.size(); i++) {
+            for (int y = 0; y < fp.size(); y++) {
+                if (fp.get(i) >= 1  && sp.get(i ) < 2 && !spBlockFp.get(i)
+                        && fp.get(y) >= 1 && sp.get(y ) < 2 && !spBlockFp.get(y)
+                        && ((i == y && fp.get(i) > 1) || (i != y ))
+                        && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
+                        && sp.size() > (i + 2 * die1) && sp.get(i + 2 * die1) < 2 && !spBlockFp.get(i + 2 * die1)
+                        && sp.size() > (i + 3 * die1) && sp.get(i + 3 * die1) < 2 && !spBlockFp.get(i + 3 * die1)
+                        && sp.size() > (y + die1) && sp.get(y + die1) < 2 && !spBlockFp.get(y + die1)
+                        && (i + 3 * die1) < fp.size() && (y + die1) < fp.size()
+                        && i < MAX_POS && y < MAX_POS) {
+                    hasValidMove = true;
+                    PositionMove positionMove = new PositionMove(
+                            i, die1, i + die1, die1, i + 2 * die1, die1, y, die1, "1 X 3 & 1 X 1");
+                    resList.add(positionMove);
+                }
+            }
+        }
+        return hasValidMove;
+    }
+
+    private boolean fourPoolsMoveDie1Once(int die1, List<PositionMove> resList, boolean hasValidMove) {
+        for (int i = 0; i < fp.size(); i++) {
+            if (fp.get(i) > 3
+                    && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
+                    && (i + die1) < fp.size()
+                    && i < MAX_POS) {
+                hasValidMove = true;
+                PositionMove positionMove = new PositionMove(i, die1, i, die1, i, die1, i, die1, "4 X 1");
+                resList.add(positionMove);
+            }
+        }
+        return hasValidMove;
+    }
+
+    private boolean poolMoveDie1FourTimes(int die1, List<PositionMove> resList, boolean hasValidMove) {
+        for (int i = 0; i < fp.size(); i++) {
+            if (fp.get(i) != 0
+                    && fp.get(i) >= 1 && sp.get(i) < 2 && !spBlockFp.get(i) // текущата позиция не е блокирана
+                    && sp.size() > (i + die1) && sp.get(i + die1) < 2 && !spBlockFp.get(i + die1)
+                    && sp.size() > (i + 2 * die1) && sp.get(i + 2 * die1) < 2 && !spBlockFp.get(i + 2 * die1)
+                    && sp.size() > (i + 3 * die1) && sp.get(i + 3 * die1) < 2 && !spBlockFp.get(i + 3 * die1)
+                    && sp.size() > (i + 4 * die1) && sp.get(i + 4 * die1) < 2 && !spBlockFp.get(i + 4 * die1)
+                    && (i + 4 * die1) < fp.size()
+                    && i < MAX_POS) {
+                hasValidMove = true;
+                PositionMove positionMove = new PositionMove(i, die1, i + die1, die1, i + 2 * die1, die1, i + 3 * die1, die1,
+                        "1 X 4");
+                resList.add(positionMove);
+            }
+        }
+        return hasValidMove;
+    }
+
+    private void poolMoveDie2(int die2, List<PositionMove> resList) {
+        for (int i = 0; i < fp.size(); i++) {
+            if (fp.get(i) != 0  && sp.get(i ) < 2 && !spBlockFp.get(i)
+                    && (i + die2) < fp.size()
+                    && !spBlockFp.get(i + die2)
+                    && !spBlockFp.get(i)
+                    && (sp.get(i + die2) == 0 || ((sp.get(i + die2) == 1 && !spBlockFp.get(i + die2))))
+                    && (i + die2) < fp.size()
+                    &&( i < MAX_POS)) {
+
+                PositionMove positionMove = new PositionMove(i, die2, "i, die2 {" + i + ", " + die2 + "}");
+                resList.add(positionMove);
+            }
+        }
+    }
+
+    private void poolMoveDie1(int die1, List<PositionMove> resList) {
+        for (int i = 0; i < fp.size(); i++) {
+            if (fp.get(i) != 0  && sp.get(i ) < 2 && !spBlockFp.get(i)
+                    && (i + die1) < fp.size()
+                    && !spBlockFp.get(i + die1)
+                    && !spBlockFp.get(i)
+                    && (sp.get(i + die1) == 0 || ((sp.get(i + die1) == 1 && !spBlockFp.get(i + die1))))
+                    && (i + die1) < fp.size()
+                    &&( i < MAX_POS)) {
+
+                PositionMove positionMove = new PositionMove(i, die1, "i, die1 {" + i + ", " + die1 + "}");
+                resList.add(positionMove);
+            }
+        }
+    }
+
+    private boolean poolMoveDie1AnotherPoleMoveDie2(int die1, int die2, List<PositionMove> resList, boolean hasValidMove) {
+        for (int i = 0; i < fp.size(); i++) {
+            for (int y = 0; y < fp.size(); y++) {
+                if (
+                        i != y
+                        && fp.get(i) != 0 && fp.get(y) != 0
+                        && sp.get(i ) < 2 && !spBlockFp.get(i)
+                        && sp.get(y ) < 2 && !spBlockFp.get(y)
+                        && (i + die1) < fp.size()
+                        && !spBlockFp.get(i + die1)
+                        && (sp.get(i + die1) == 0 || ((sp.get(i + die1) == 1 && !spBlockFp.get(i + die1))))
+                        && (y + die2) < fp.size()
+                        && !spBlockFp.get(y + die2)
+                        && (sp.get(y + die2) == 0 || ((sp.get(y + die2) == 1 && !spBlockFp.get(y + die2))))
+                        && (i + die1) < fp.size() && (y + die2) < fp.size()
+                        &&( i < MAX_POS && y < MAX_POS)) {
+
+                    hasValidMove = true;
+                    PositionMove positionMove = new PositionMove(i, die1, y, die2,
+                            "i, die1, y, die2 {" + i + ", " + die1 + ", " + y + ", " + die2 + "}");
+                    resList.add(positionMove);
+                }
+            }
+        }
+        return hasValidMove;
+    }
+
+    private boolean poolMoveDie2AndDie1AfterThat(int die1, int die2, List<PositionMove> resList, boolean hasValidMove) {
+        for (int i = 0; i < fp.size(); i++) {
+            if (fp.get(i) != 0  && sp.get(i ) < 2 && !spBlockFp.get(i)
+                    && (i + die1 + die2) < fp.size()
+                    && !spBlockFp.get(i + die2)
+                    && (sp.get(i + die2) == 0 || ((sp.get(i + die2) == 1 && !spBlockFp.get(i + die2))))
+                    && (sp.get(i + die1 + die2) == 0 || ((sp.get(i + die1 + die2) == 1 && !spBlockFp.get(i + die1 + die2))))
+                    && (i + die1 + die2) < fp.size()
+                    && i < MAX_POS) {
+
+                hasValidMove = true;
+                PositionMove positionMove = new PositionMove(i, die2, i + die2, die1,
+                        "i, die2, i + die2, die1{" + i + ", " + die1 + ", " + (i + die1) + ", " + die2 + "}");
+                resList.add(positionMove);
+            }
+        }
+        return hasValidMove;
+    }
+
+    private boolean poolMoveDie1AndDie2AfterThat(int die1, int die2, List<PositionMove> resList, boolean hasValidMove) {
+        for (int i = 0; i < fp.size(); i++) {
+            if (fp.get(i) != 0  && sp.get(i ) < 2 && !spBlockFp.get(i)
+                    && (i + die1 + die2) < fp.size()
+                    && !spBlockFp.get(i + die1)
+                    && (sp.get(i + die1) == 0 || ((sp.get(i + die1) == 1 && !spBlockFp.get(i + die1))))
+                    && (sp.get(i + die1 + die2) == 0 || ((sp.get(i + die1 + die2) == 1 && !spBlockFp.get(i + die1 + die2))))
+                    && (i + die1 + die2) < fp.size()
+                    && i < MAX_POS) {
+
+                hasValidMove = true;
+                PositionMove positionMove = new PositionMove(i, die1, i + die1, die2,
+                        "i, die1, i + die1, die2{" + i + ", " + die1 + ", " + (i + die1) + ", " + die2 + "}" );
+                resList.add(positionMove);
+
+            }
+        }
+        return hasValidMove;
     }
 
     public void switchPlayersPerspective() {
@@ -429,6 +493,15 @@ public class Core {
         if (sp.get(currentPosition + currentMove) > 0) {
             fpBlockSp.set(currentPosition + currentMove, true);
         }
+    }
+
+    public boolean playerWon() {
+        for (int i = 0; i < MAX_POS; i++){
+            if (fp.get(i) != 0){
+                return false;
+            }
+        }
+        return true;
     }
 
     class PositionMove {

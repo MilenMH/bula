@@ -11,9 +11,6 @@ public class BulaApplication {
         Core core = new Core();
         ConsoleUI consoleUI = new ConsoleUI(core);
 
-        //core.sp.set(8,2);
-        //core.sp.set(9,2);
-
 
         while (true) {
 
@@ -22,12 +19,16 @@ public class BulaApplication {
             int die1 = getRandomNumberUsingInts(1, 6);
             int die2 = getRandomNumberUsingInts(1, 6);
 
+
             List<Core.PositionMove> nextCurrentPlayerPossibleMoves = core.getNextCurrentPlayerPossibleMoves(die1, die2);
             if (nextCurrentPlayerPossibleMoves.size() == 0){
-                //exit
+                if (core.playerWon()){
+                    break;
+                }
+            }else{
+                int nextRndMove = getRandomNumberUsingInts(0, nextCurrentPlayerPossibleMoves.size());
+                core.performMove(nextCurrentPlayerPossibleMoves.get(nextRndMove), die1, die2);
             }
-            int nextRndMove = getRandomNumberUsingInts(0, nextCurrentPlayerPossibleMoves.size());
-            core.performMove(nextCurrentPlayerPossibleMoves.get(nextRndMove), die1, die2);
 
             core.switchPlayersPerspective();
 
@@ -35,10 +36,13 @@ public class BulaApplication {
             die2 = getRandomNumberUsingInts(1, 6);
             nextCurrentPlayerPossibleMoves = core.getNextCurrentPlayerPossibleMoves(die1, die2);
             if (nextCurrentPlayerPossibleMoves.size() == 0){
-                //exit
+                if (core.playerWon()){
+                    break;
+                }
+            }else {
+                int nextRndMove = getRandomNumberUsingInts(0, nextCurrentPlayerPossibleMoves.size());
+                core.performMove(nextCurrentPlayerPossibleMoves.get(nextRndMove), die1, die2);
             }
-            nextRndMove = getRandomNumberUsingInts(0, nextCurrentPlayerPossibleMoves.size());
-            core.performMove(nextCurrentPlayerPossibleMoves.get(nextRndMove), die1, die2);
             core.switchPlayersPerspective();
 
         }
